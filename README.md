@@ -35,6 +35,9 @@ $ npm install
 ## Running the app
 
 ```bash
+# create .env file 
+$ cp .env.example .env
+
 # run entire app
 $ docker-compose up
 
