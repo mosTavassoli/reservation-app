@@ -45,4 +45,14 @@ export class UsersService {
       data: user,
     }) as Promise<UserEntity>;
   }
+
+  async getAllUsers(): Promise<UserDto[]> {
+    const users: UserEntity[] = await this.prismaService.user.findMany();
+    this.logger.debug(`Users: ${JSON.stringify(users)}`);
+    return users.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    }));
+  }
 }

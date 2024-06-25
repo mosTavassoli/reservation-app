@@ -1,10 +1,11 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { UserDto, UserResponseDto } from '../dto/users.dto';
 import {
   ApiBadRequestResponse,
   ApiBody,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -30,5 +31,19 @@ export class UsersController {
     return (await this.userService.createUser(
       createUserDto,
     )) as UserResponseDto;
+  }
+
+  @Get('')
+  @ApiOperation({
+    summary: 'Get all users',
+    operationId: 'getAllUsers',
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOkResponse({
+    description: 'Return the list of users.',
+    type: [UserDto],
+  })
+  async getAllTables(): Promise<UserDto[]> {
+    return await this.userService.getAllUsers();
   }
 }
