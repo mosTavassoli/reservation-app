@@ -35,6 +35,12 @@ $ npm install
 ## Running the app
 
 ```bash
+# run entire app
+$ docker-compose up
+
+# swagger api
+$ http://localhost:3000/swagger-api/v1
+
 # development
 $ npm run start
 
@@ -48,12 +54,6 @@ $ npm run start:prod
 ## Test
 
 ```bash
-# run entire app
-$ docker-compose up
-
-# swagger api
-$ http://localhost:3000/swagger-api/v1
-
 # unit tests
 $ npm run test
 
