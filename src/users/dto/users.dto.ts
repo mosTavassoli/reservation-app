@@ -7,8 +7,10 @@ export class UserEntity {
   id: number;
   name: string;
   email: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export class userResponseDto extends UserDto {
+export class UserResponseDto extends UserDto {
   id: number;
 }

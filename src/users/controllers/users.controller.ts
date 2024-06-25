@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
-import { UserDto, userResponseDto } from '../dto/users.dto';
+import { UserDto, UserResponseDto } from '../dto/users.dto';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -20,13 +20,15 @@ export class UsersController {
   @ApiOperation({ summary: 'Create User', operationId: 'createUser' })
   @ApiCreatedResponse({
     description: 'user created successfully.',
-    type: userResponseDto,
+    type: UserResponseDto,
   })
   @ApiBody({ type: UserDto, required: true })
   @ApiBadRequestResponse({ description: 'user can not be created.' })
   async createUser(
     @Body(new AjvValidationPipe(UserDtoSchema)) createUserDto: UserDto,
-  ): Promise<userResponseDto> {
-    return await this.userService.createUser(createUserDto);
+  ): Promise<UserResponseDto> {
+    return (await this.userService.createUser(
+      createUserDto,
+    )) as UserResponseDto;
   }
 }

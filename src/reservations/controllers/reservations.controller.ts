@@ -48,7 +48,7 @@ export class ReservationsController {
   async createReservation(
     @Body(new AjvValidationPipe(ReservationDtoSchema))
     reservationRequest: ReservationDto,
-  ) {
+  ): Promise<ReservationListDto> {
     return await this.reservationsService.createReservation(reservationRequest);
   }
 

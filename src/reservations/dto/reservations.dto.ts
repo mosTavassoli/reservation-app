@@ -1,7 +1,17 @@
+export class ReservationEntity {
+  id: number;
+  userId: number;
+  tableId: number;
+  reservedFrom: Date;
+  reservedTo: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class ReservationDto {
   userId: number;
   tableId: number;
-  reservedFrom: number;
+  reservedFrom: number; // Unix timestamp
 }
 
 export class ReservationListDto {

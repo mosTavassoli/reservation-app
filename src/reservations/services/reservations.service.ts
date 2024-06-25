@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   PaginatedReservation,
   ReservationDto,
+  ReservationEntity,
   ReservationListDto,
   ReservationPaginatedQuery,
 } from '../dto/reservations.dto';
@@ -21,7 +22,9 @@ export class ReservationsService {
   constructor(private readonly prismaService: PrismaService) {}
   private readonly logger = new Logger(ReservationsService.name);
 
-  createReservation = async (reservationRequest: ReservationDto) => {
+  createReservation = async (
+    reservationRequest: ReservationDto,
+  ): Promise<ReservationListDto> => {
     try {
       const { userId, tableId, reservedFrom } = reservationRequest;
       const [user, table] = await this.prismaService.$transaction([
@@ -50,7 +53,7 @@ export class ReservationsService {
       this.logger.debug(
         `Reservation Request: ${JSON.stringify(reservationRequest)}`,
       );
-      this.logger.debug(`Formatted date: ${fromTime.toISOString()}`);
+      this.logger.debug(`Formatted date: ${fromTime}`);
       const toTime = fromTime.add(1, 'hour');
 
       if (
@@ -64,19 +67,26 @@ export class ReservationsService {
 
       await this.checkForOverlappingReservations(tableId, fromTime, toTime);
 
-      const reservation = await this.prismaService.reservation.create({
-        data: {
-          ...reservationRequest,
-          reservedFrom: fromTime.utc().toDate(),
-          reservedTo: toTime.utc().toDate(),
-        },
-      });
+      const reservation: ReservationEntity =
+        await this.prismaService.reservation.create({
+          data: {
+            ...reservationRequest,
+            reservedFrom: fromTime.toDate(),
+            reservedTo: toTime.toDate(),
+          },
+        });
 
       this.logger.debug(
         `Reservation created successfully: ${JSON.stringify(reservation)}`,
       );
 
-      return reservation;
+      return {
+        id: reservation.id,
+        userId: reservation.userId,
+        tableId: reservation.tableId,
+        reservedFrom: reservation.reservedFrom,
+        reservedTo: reservation.reservedTo,
+      };
     } catch (error) {
       this.logger.error(`Can not book the table. Try again`);
       throw error;
@@ -144,7 +154,7 @@ export class ReservationsService {
       }
 
       const [reservations, total] = await Promise.all([
-        this.prismaService.$queryRaw<ReservationListDto[]>(
+        this.prismaService.$queryRaw<ReservationEntity[]>(
           Prisma.sql`SELECT * FROM Reservation
           ${whereClause} 
           ORDER BY reservedFrom DESC
@@ -161,7 +171,13 @@ export class ReservationsService {
       const count = Number(total[0].count);
 
       return {
-        data: reservations,
+        data: reservations.map((r) => ({
+          id: r.id,
+          userId: r.userId,
+          tableId: r.tableId,
+          reservedFrom: r.reservedFrom,
+          reservedTo: r.reservedTo,
+        })),
         meta: {
           isFirstPage: page === 1,
           isLastPage: page * pageSize >= count,

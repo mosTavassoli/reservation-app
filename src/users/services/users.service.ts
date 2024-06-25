@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { UserDto, UserEntity } from '../dto/users.dto';
+import { UserDto, UserEntity, UserResponseDto } from '../dto/users.dto';
 import { PrismaService } from 'database/prisma/prisma.service';
 
 @Injectable()
@@ -7,17 +7,22 @@ export class UsersService {
   constructor(private prismaService: PrismaService) {}
   private readonly logger = new Logger(UsersService.name);
 
-  async createUser(user: UserDto): Promise<UserEntity> {
+  async createUser(user: UserDto): Promise<UserResponseDto> {
     try {
       this.logger.debug(`user : ${JSON.stringify(user)}`);
 
       await this.validateUniqueUser(user);
-      const createdUser = await this.prismaCreateUser(user);
+      const createdUser: UserEntity = await this.prismaCreateUser(user);
+
       this.logger.debug(
         `User created successfully: ${JSON.stringify(createdUser)}`,
       );
 
-      return createdUser;
+      return {
+        id: createdUser.id,
+        name: createdUser.name,
+        email: createdUser.email,
+      };
     } catch (error) {
       this.logger.error(`Error creating user: ${error.message}`);
       throw new BadRequestException('Failed to create user. Please try again.');
